@@ -35,6 +35,13 @@
             </intent-filter>
         </service>
         <service android:name="com.sam_chordas.android.stockhawk.service.StockIntentService" />
+
+        <receiver android:name=".service.NoStockFoundBroadcast">
+            <intent-filter>
+                <action android:name="com.aashish.stockhawk.ui.MyStocksActivity.STOCK_NOT_FOUND"></action>
+            </intent-filter>
+        </receiver>
+
         <provider
             android:authorities="com.sam_chordas.android.stockhawk.data.QuoteProvider"
             android:name="com.sam_chordas.android.stockhawk.data.generated.QuoteProvider"
