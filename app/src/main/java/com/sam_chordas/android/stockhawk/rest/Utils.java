@@ -78,6 +78,16 @@ public class Utils {
     return change;
   }
 
+  public static String convertDate(String inputDate){
+    StringBuilder outputFormattedDate = new StringBuilder();
+    outputFormattedDate.append(inputDate.substring(6))
+            .append("/")
+            .append(inputDate.substring(4,6))
+            .append("/")
+            .append(inputDate.substring(2, 4));
+    return outputFormattedDate.toString();
+  }
+
   public static ContentProviderOperation buildBatchOperation(JSONObject jsonObject) {
     ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(
             QuoteProvider.Quotes.CONTENT_URI);

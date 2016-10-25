@@ -4,9 +4,12 @@ import android.content.ContentProviderOperation;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.OperationApplicationException;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.os.RemoteException;
+import android.preference.PreferenceManager;
+import android.support.annotation.IntDef;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GcmNetworkManager;
@@ -21,9 +24,11 @@ import com.squareup.okhttp.Response;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-
+import com.sam_chordas.android.stockhawk.R;
 /**
  * Created by sam_chordas on 9/30/15.
  * The GCMTask service is primarily for periodic tasks. However, OnRunTask can be called directly
@@ -36,6 +41,22 @@ public class StockTaskService extends GcmTaskService{
   private Context mContext;
   private StringBuilder mStoredSymbols = new StringBuilder();
   private boolean isUpdate;
+
+
+  @Retention(RetentionPolicy.SOURCE)
+  @IntDef({STATUS_OK, STATUS_SERVER_ERROR, STATUS_NO_NETWORK, STATUS_ERROR_JSON,
+          STATUS_UNKNOWN, STATUS_SERVER_DOWN})
+
+
+  public @interface StockStatuses {
+  }
+
+  public static final int STATUS_OK = 0;
+  public static final int STATUS_ERROR_JSON = 1;
+  public static final int STATUS_SERVER_ERROR = 2;
+  public static final int STATUS_SERVER_DOWN = 3;
+  public static final int STATUS_NO_NETWORK = 4;
+  public static final int STATUS_UNKNOWN = 5;
 
   public StockTaskService(){}
 
@@ -116,6 +137,7 @@ public class StockTaskService extends GcmTaskService{
       urlString = urlStringBuilder.toString();
       try{
         getResponse = fetchData(urlString);
+        Log.d(LOG_TAG,getResponse);
         result = GcmNetworkManager.RESULT_SUCCESS;
         try {
           ContentValues contentValues = new ContentValues();
@@ -128,6 +150,8 @@ public class StockTaskService extends GcmTaskService{
 
           ArrayList<ContentProviderOperation> contentProviderOperations = Utils.quoteJsonToContentVals(getResponse);
 
+          System.out.print("contentProviderOperations-->"+contentProviderOperations.size());
+
           if(contentProviderOperations.size() > 0){
             mContext.getContentResolver().applyBatch(QuoteProvider.AUTHORITY,contentProviderOperations);
 
@@ -136,13 +160,21 @@ public class StockTaskService extends GcmTaskService{
           }
         }catch (RemoteException | OperationApplicationException e) {
           Log.e(LOG_TAG, "Error applying batch insert", e);
+          setStockStatus(mContext, STATUS_ERROR_JSON);
         }
       } catch (IOException e){
         e.printStackTrace();
+        setStockStatus(mContext, STATUS_SERVER_DOWN);
       }
     }
 
     return result;
   }
 
+   public static void setStockStatus(Context context, @StockStatuses int stockStatus) {
+    SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(context);
+    SharedPreferences.Editor editor = sp.edit();
+    editor.putInt(context.getString(R.string.stockStatus), stockStatus);
+    editor.apply();
+  }
 }
