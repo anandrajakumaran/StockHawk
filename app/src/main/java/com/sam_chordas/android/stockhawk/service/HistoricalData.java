@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.annotation.IntDef;
+import android.util.Log;
 
 import com.android.volley.NetworkError;
 import com.android.volley.NoConnectionError;
@@ -76,6 +77,7 @@ public class HistoricalData {
     public void getHistoricalData(String symbol) {
 
         String URL = BASE_URL + symbol + END_URL;
+        Log.v("INFO","History URL ===>"+URL);
 
         final StringRequest request = new StringRequest(
                 Request.Method.GET,

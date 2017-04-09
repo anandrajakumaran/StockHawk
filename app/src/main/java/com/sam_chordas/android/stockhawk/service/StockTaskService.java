@@ -29,6 +29,9 @@ import java.lang.annotation.RetentionPolicy;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import com.sam_chordas.android.stockhawk.R;
+
+import org.json.JSONException;
+
 /**
  * Created by sam_chordas on 9/30/15.
  * The GCMTask service is primarily for periodic tasks. However, OnRunTask can be called directly
@@ -99,6 +102,7 @@ public class StockTaskService extends GcmTaskService{
               URLEncoder.encode("\"YHOO\",\"AAPL\",\"GOOG\",\"MSFT\")", "UTF-8"));
         } catch (UnsupportedEncodingException e) {
           e.printStackTrace();
+          setStockStatus(mContext, STATUS_UNKNOWN);
         }
       } else if (initQueryCursor != null){
         DatabaseUtils.dumpCursor(initQueryCursor);
@@ -158,8 +162,11 @@ public class StockTaskService extends GcmTaskService{
           }else{
             result = GcmNetworkManager.RESULT_FAILURE;
           }
-        }catch (RemoteException | OperationApplicationException e) {
+        }catch (RemoteException | OperationApplicationException e ) {
           Log.e(LOG_TAG, "Error applying batch insert", e);
+          setStockStatus(mContext, STATUS_ERROR_JSON);
+        }catch (JSONException e) {
+          e.printStackTrace();
           setStockStatus(mContext, STATUS_ERROR_JSON);
         }
       } catch (IOException e){

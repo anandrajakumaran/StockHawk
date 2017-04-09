@@ -106,7 +106,7 @@ public class StockDetails extends AppCompatActivity implements HistoricalData.Hi
         earningsshare = getIntent().getStringExtra("earningsshare");
         marketcapitalization = getIntent().getStringExtra("marketcaptalization");
 
-        setSupportActionBar(toolbar);
+//        setSupportActionBar(toolbar);
         actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
